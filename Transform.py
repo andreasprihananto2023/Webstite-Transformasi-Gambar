@@ -16,8 +16,12 @@ if unggah_file is not None:
     st.image(cv2.cvtColor(gambar, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_container_width=True)
 
     # 1. Translasi
-    matriks_translasi = np.array([[1, 0, 50],
-                                  [0, 1, 30],
+    st.subheader("Translasi")
+    dx = st.slider("Translasi Horizontal (dx)", -200, 200, 50)
+    dy = st.slider("Translasi Vertikal (dy)", -200, 200, 30)
+
+    matriks_translasi = np.array([[1, 0, dx],
+                                  [0, 1, dy],
                                   [0, 0, 1]])
     gambar_translasi = np.zeros_like(gambar)
     for y in range(tinggi):
@@ -30,9 +34,11 @@ if unggah_file is not None:
     st.image(cv2.cvtColor(gambar_translasi, cv2.COLOR_BGR2RGB), caption="Gambar Translasi", use_container_width=True)
 
     # 2. Rotasi
-    sudut = math.radians(45)
-    matriks_rotasi = np.array([[math.cos(sudut), -math.sin(sudut), 0],
-                               [math.sin(sudut), math.cos(sudut), 0],
+    st.subheader("Rotasi")
+    sudut = st.slider("Sudut Rotasi (derajat)", -180, 180, 45)
+    radian = math.radians(sudut)
+    matriks_rotasi = np.array([[math.cos(radian), -math.sin(radian), 0],
+                               [math.sin(radian), math.cos(radian), 0],
                                [0, 0, 1]])
     tengah_x, tengah_y = lebar // 2, tinggi // 2
     gambar_rotasi = np.zeros_like(gambar)
@@ -46,10 +52,14 @@ if unggah_file is not None:
     st.image(cv2.cvtColor(gambar_rotasi, cv2.COLOR_BGR2RGB), caption="Gambar Rotasi", use_container_width=True)
 
     # 3. Skala
-    matriks_skala = np.array([[1.5, 0, 0],
-                              [0, 1.5, 0],
+    st.subheader("Skala")
+    skala_x = st.slider("Skala Horizontal", 0.5, 3.0, 1.5)
+    skala_y = st.slider("Skala Vertikal", 0.5, 3.0, 1.5)
+
+    matriks_skala = np.array([[skala_x, 0, 0],
+                              [0, skala_y, 0],
                               [0, 0, 1]])
-    tinggi_skala, lebar_skala = int(tinggi * 1.5), int(lebar * 1.5)
+    tinggi_skala, lebar_skala = int(tinggi * skala_y), int(lebar * skala_x)
     gambar_skala = np.zeros((tinggi_skala, lebar_skala, 3), dtype=gambar.dtype)
     for y in range(tinggi):
         for x in range(lebar):
@@ -61,8 +71,12 @@ if unggah_file is not None:
     st.image(cv2.cvtColor(gambar_skala, cv2.COLOR_BGR2RGB), caption="Gambar Skala", use_container_width=True)
 
     # 4. Distorsi (Skewing)
-    matriks_distorsi = np.array([[1, 1.5, 0],
-                                 [0.5, 1, 0],
+    st.subheader("Distorsi")
+    skew_x = st.slider("Distorsi Horizontal", 0.0, 2.0, 1.5)
+    skew_y = st.slider("Distorsi Vertikal", 0.0, 2.0, 0.5)
+
+    matriks_distorsi = np.array([[1, skew_x, 0],
+                                 [skew_y, 1, 0],
                                  [0, 0, 1]])
     tinggi_distorsi, lebar_distorsi = int(tinggi * 2), int(lebar * 2)
     gambar_distorsi = np.zeros((tinggi_distorsi, lebar_distorsi, 3), dtype=gambar.dtype)
