@@ -1,21 +1,18 @@
 import streamlit as st
 import cv2
 import numpy as np
-import math
 
-# Fungsi untuk mengompres gambar
+# Kompres gambar
 @st.cache_data
 def compress_image(image, max_size=(800, 800)):
-    """Mengompres gambar dengan menjaga rasio aspek"""
     h, w = image.shape[:2]
     ratio = min(max_size[0]/w, max_size[1]/h)
     new_size = (int(w*ratio), int(h*ratio))
     return cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
 
-# Fungsi transformasi dengan caching
+# Caching
 @st.cache_data
 def transform_image(image, transform_type, **kwargs):
-    """Fungsi transformasi gambar dengan caching"""
     if transform_type == 'translasi':
         dx, dy = kwargs.get('dx', 0), kwargs.get('dy', 0)
         matriks_translasi = np.float32([[1, 0, dx], [0, 1, dy]])
@@ -42,16 +39,8 @@ def transform_image(image, transform_type, **kwargs):
         matriks_distorsi = cv2.getPerspectiveTransform(pts1, pts2)
         return cv2.warpPerspective(image, matriks_distorsi, (w, h))
 
-def main():
-    st.title("Aplikasi Transformasi Gambar Cepat")
-
-    # Sidebar untuk pengaturan
-    with st.sidebar:
-        st.header("Pilih Jenis Transformasi")
-        transform_type = st.radio(
-            "Transformasi",
-            ['Translasi', 'Rotasi', 'Skala', 'Distorsi']
-        )
+def halaman_kedua():
+    st.title("Website Transformasi Gambar")
 
     # Unggah file
     unggah_file = st.file_uploader(
@@ -65,9 +54,15 @@ def main():
         gambar_asli = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
         gambar_asli = compress_image(gambar_asli)
 
-        # Layout dengan 3 baris
+        # Layout dengan gambar asli
         st.subheader("Gambar Asli")
         st.image(cv2.cvtColor(gambar_asli, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_container_width=True)
+
+        # Pilih jenis transformasi
+        transform_type = st.radio(
+            "Pilih Jenis Transformasi",
+            ['Translasi', 'Rotasi', 'Skala', 'Distorsi']
+        )
 
         # Pengaturan transformasi
         st.subheader("Pilih Pengaturan Transformasi")
@@ -114,8 +109,24 @@ def main():
         st.image(
             cv2.cvtColor(gambar_transformasi, cv2.COLOR_BGR2RGB), 
             caption=f"Gambar {transform_type}", 
-            use_container_width=True
-        )
+            use_container_width=True)
+
+def halaman_pertama():
+    st.title("Landing Page - Transformasi Gambar")
+    st.write("Selamat datang di website transformasi gambar. Klik tombol di bawah untuk melanjutkan ke halaman transformasi gambar.")
+    
+    # Tombol untuk pindah ke halaman kedua
+    if st.button("Ke Halaman Transformasi"):
+        halaman_kedua()
+
+def main():
+    # Pilihan untuk halaman pertama atau kedua
+    page = st.selectbox("Pilih Halaman", ["Landing Page", "Halaman Transformasi"])
+    
+    if page == "Landing Page":
+        halaman_pertama()
+    elif page == "Halaman Transformasi":
+        halaman_kedua()
 
 if __name__ == "__main__":
     main()
