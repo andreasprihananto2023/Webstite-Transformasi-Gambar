@@ -25,38 +25,21 @@ if unggah_file is not None:
     skew_x = st.slider("Distorsi X", 0.0, 2.0, 0.0)
     skew_y = st.slider("Distorsi Y", 0.0, 2.0, 0.0)
 
-    # Membuat matriks transformasi gabungan
+    # Menghitung matriks transformasi gabungan
     angle_rad = math.radians(sudut)
     matriks_translasi = np.array([[1, 0, dx],
-                                  [0, 1, dy],
-                                  [0, 0, 1]])
-    matriks_rotasi = np.array([[math.cos(angle_rad), -math.sin(angle_rad), 0],
-                               [math.sin(angle_rad), math.cos(angle_rad), 0],
-                               [0, 0, 1]])
-    matriks_skala = np.array([[scale, 0, 0],
-                              [0, scale, 0],
-                              [0, 0, 1]])
-    matriks_distorsi = np.array([[1, skew_x, 0],
-                                  [skew_y, 1, 0],
-                                  [0, 0, 1]])
+                                  [0, 1, dy]])
+    matriks_rotasi = cv2.getRotationMatrix2D((lebar / 2, tinggi / 2), sudut, scale)
+    matriks_skala = np.array([[scale, 0],
+                              [0, scale]])
+    matriks_distorsi = np.array([[1, skew_x],
+                                 [skew_y, 1]])
 
-    # Kombinasi matriks
+    # Matriks gabungan
     matriks_transformasi = matriks_translasi @ matriks_rotasi @ matriks_skala @ matriks_distorsi
 
-    # Transformasi gambar
-    def transformasi_gambar(matriks, tinggi, lebar):
-        hasil = np.zeros_like(gambar)
-        for y in range(tinggi):
-            for x in range(lebar):
-                koordinat_asli = np.array([x, y, 1])
-                koordinat_baru = matriks @ koordinat_asli
-                x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
-                if 0 <= x_baru < lebar and 0 <= y_baru < tinggi:
-                    hasil[y_baru, x_baru] = gambar[y, x]
-        return hasil
-
-    # Gambar setelah transformasi gabungan
-    gambar_akhir = transformasi_gambar(matriks_transformasi, tinggi, lebar)
+    # Transformasi gambar menggunakan cv2.warpAffine
+    gambar_akhir = cv2.warpAffine(gambar, matriks_transformasi[:2], (lebar, tinggi))
 
     # Menampilkan hasil transformasi
     st.image(cv2.cvtColor(gambar_akhir, cv2.COLOR_BGR2RGB), caption="Hasil Transformasi", use_container_width=True)
