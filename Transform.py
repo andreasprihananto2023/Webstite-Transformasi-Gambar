@@ -13,7 +13,7 @@ if unggah_file is not None:
     file_bytes = np.asarray(bytearray(unggah_file.read()), dtype=np.uint8)
     gambar = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     tinggi, lebar = gambar.shape[:2]
-    st.image(cv2.cvtColor(gambar, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_column_width=True)
+    st.image(cv2.cvtColor(gambar, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_container_width=True)
 
     # 1. Translasi
     matriks_translasi = np.array([[1, 0, 50],
@@ -27,7 +27,7 @@ if unggah_file is not None:
             x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
             if 0 <= x_baru < lebar and 0 <= y_baru < tinggi:
                 gambar_translasi[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_translasi, cv2.COLOR_BGR2RGB), caption="Gambar Translasi", use_column_width=True)
+    st.image(cv2.cvtColor(gambar_translasi, cv2.COLOR_BGR2RGB), caption="Gambar Translasi", use_container_width=True)
 
     # 2. Rotasi
     sudut = math.radians(45)
@@ -43,7 +43,7 @@ if unggah_file is not None:
             x_baru, y_baru = int(koordinat_baru[0] + tengah_x), int(koordinat_baru[1] + tengah_y)
             if 0 <= x_baru < lebar and 0 <= y_baru < tinggi:
                 gambar_rotasi[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_rotasi, cv2.COLOR_BGR2RGB), caption="Gambar Rotasi", use_column_width=True)
+    st.image(cv2.cvtColor(gambar_rotasi, cv2.COLOR_BGR2RGB), caption="Gambar Rotasi", use_container_width=True)
 
     # 3. Skala
     matriks_skala = np.array([[1.5, 0, 0],
@@ -58,7 +58,7 @@ if unggah_file is not None:
             x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
             if 0 <= x_baru < lebar_skala and 0 <= y_baru < tinggi_skala:
                 gambar_skala[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_skala, cv2.COLOR_BGR2RGB), caption="Gambar Skala", use_column_width=True)
+    st.image(cv2.cvtColor(gambar_skala, cv2.COLOR_BGR2RGB), caption="Gambar Skala", use_container_width=True)
 
     # 4. Distorsi (Skewing)
     matriks_distorsi = np.array([[1, 1.5, 0],
@@ -73,4 +73,4 @@ if unggah_file is not None:
             x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
             if 0 <= x_baru < lebar_distorsi and 0 <= y_baru < tinggi_distorsi:
                 gambar_distorsi[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_distorsi, cv2.COLOR_BGR2RGB), caption="Gambar Distorsi", use_column_width=True)
+    st.image(cv2.cvtColor(gambar_distorsi, cv2.COLOR_BGR2RGB), caption="Gambar Distorsi", use_container_width=True)
