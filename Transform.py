@@ -41,7 +41,7 @@ def transform_image(image, transform_type, **kwargs):
         return cv2.warpPerspective(image, matriks_distorsi, (w, h))
 
 def main():
-    st.title("Website Transformasi Gambar")
+    st.title("Transformasi Gambar Progress Group 7")
 
     # Unggah file
     unggah_file = st.file_uploader(
