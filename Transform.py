@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 import numpy as np
+import math
 
 # Kompres gambar
 @st.cache_data
@@ -39,7 +40,7 @@ def transform_image(image, transform_type, **kwargs):
         matriks_distorsi = cv2.getPerspectiveTransform(pts1, pts2)
         return cv2.warpPerspective(image, matriks_distorsi, (w, h))
 
-def halaman_kedua():
+def main():
     st.title("Website Transformasi Gambar")
 
     # Unggah file
@@ -110,23 +111,6 @@ def halaman_kedua():
             cv2.cvtColor(gambar_transformasi, cv2.COLOR_BGR2RGB), 
             caption=f"Gambar {transform_type}", 
             use_container_width=True)
-
-def halaman_pertama():
-    st.title("Landing Page - Transformasi Gambar")
-    st.write("Selamat datang di website transformasi gambar. Klik tombol di bawah untuk melanjutkan ke halaman transformasi gambar.")
-    
-    # Tombol untuk pindah ke halaman kedua
-    if st.button("Ke Halaman Transformasi"):
-        halaman_kedua()
-
-def main():
-    # Pilihan untuk halaman pertama atau kedua
-    page = st.selectbox("Pilih Halaman", ["Landing Page", "Halaman Transformasi"])
-    
-    if page == "Landing Page":
-        halaman_pertama()
-    elif page == "Halaman Transformasi":
-        halaman_kedua()
 
 if __name__ == "__main__":
     main()
