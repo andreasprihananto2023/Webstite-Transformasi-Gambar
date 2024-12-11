@@ -3,9 +3,9 @@ import cv2
 import numpy as np
 import math
 
-st.title("Aplikasi Transformasi Gambar")
+st.title("Aplikasi Transformasi Gambar Interaktif")
 
-# Unggah file
+# Unggah file gambar
 unggah_file = st.file_uploader("Unggah gambar dalam format JPEG atau PNG", type=["jpg", "jpeg", "png"])
 
 if unggah_file is not None:
@@ -15,76 +15,53 @@ if unggah_file is not None:
     tinggi, lebar = gambar.shape[:2]
     st.image(cv2.cvtColor(gambar, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_container_width=True)
 
-    # 1. Translasi
-    st.subheader("Translasi")
-    dx = st.slider("Translasi Horizontal (dx)", -200, 200, 50)
-    dy = st.slider("Translasi Vertikal (dy)", -200, 200, 30)
-
+    # Slider untuk translasi
+    dx = st.slider("Translasi X (px)", -200, 200, 0)
+    dy = st.slider("Translasi Y (px)", -200, 200, 0)
     matriks_translasi = np.array([[1, 0, dx],
                                   [0, 1, dy],
                                   [0, 0, 1]])
-    gambar_translasi = np.zeros_like(gambar)
-    for y in range(tinggi):
-        for x in range(lebar):
-            koordinat_asli = np.array([x, y, 1])
-            koordinat_baru = matriks_translasi @ koordinat_asli
-            x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
-            if 0 <= x_baru < lebar and 0 <= y_baru < tinggi:
-                gambar_translasi[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_translasi, cv2.COLOR_BGR2RGB), caption="Gambar Translasi", use_container_width=True)
 
-    # 2. Rotasi
-    st.subheader("Rotasi")
-    sudut = st.slider("Sudut Rotasi (derajat)", -180, 180, 45)
-    radian = math.radians(sudut)
-    matriks_rotasi = np.array([[math.cos(radian), -math.sin(radian), 0],
-                               [math.sin(radian), math.cos(radian), 0],
+    # Slider untuk rotasi
+    sudut = st.slider("Sudut Rotasi (derajat)", -180, 180, 0)
+    angle_rad = math.radians(sudut)
+    matriks_rotasi = np.array([[math.cos(angle_rad), -math.sin(angle_rad), 0],
+                               [math.sin(angle_rad), math.cos(angle_rad), 0],
                                [0, 0, 1]])
-    tengah_x, tengah_y = lebar // 2, tinggi // 2
-    gambar_rotasi = np.zeros_like(gambar)
-    for y in range(tinggi):
-        for x in range(lebar):
-            koordinat_relative = np.array([x - tengah_x, y - tengah_y, 1])
-            koordinat_baru = matriks_rotasi @ koordinat_relative
-            x_baru, y_baru = int(koordinat_baru[0] + tengah_x), int(koordinat_baru[1] + tengah_y)
-            if 0 <= x_baru < lebar and 0 <= y_baru < tinggi:
-                gambar_rotasi[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_rotasi, cv2.COLOR_BGR2RGB), caption="Gambar Rotasi", use_container_width=True)
 
-    # 3. Skala
-    st.subheader("Skala")
-    skala_x = st.slider("Skala Horizontal", 0.5, 3.0, 1.5)
-    skala_y = st.slider("Skala Vertikal", 0.5, 3.0, 1.5)
-
-    matriks_skala = np.array([[skala_x, 0, 0],
-                              [0, skala_y, 0],
+    # Slider untuk skala
+    scale = st.slider("Faktor Skala", 0.5, 2.0, 1.0)
+    matriks_skala = np.array([[scale, 0, 0],
+                              [0, scale, 0],
                               [0, 0, 1]])
-    tinggi_skala, lebar_skala = int(tinggi * skala_y), int(lebar * skala_x)
-    gambar_skala = np.zeros((tinggi_skala, lebar_skala, 3), dtype=gambar.dtype)
-    for y in range(tinggi):
-        for x in range(lebar):
-            koordinat_asli = np.array([x, y, 1])
-            koordinat_baru = matriks_skala @ koordinat_asli
-            x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
-            if 0 <= x_baru < lebar_skala and 0 <= y_baru < tinggi_skala:
-                gambar_skala[y_baru, x_baru] = gambar[y, x]
-    st.image(cv2.cvtColor(gambar_skala, cv2.COLOR_BGR2RGB), caption="Gambar Skala", use_container_width=True)
 
-    # 4. Distorsi (Skewing)
-    st.subheader("Distorsi")
-    skew_x = st.slider("Distorsi Horizontal", 0.0, 2.0, 1.5)
-    skew_y = st.slider("Distorsi Vertikal", 0.0, 2.0, 0.5)
-
+    # Slider untuk distorsi
+    skew_x = st.slider("Distorsi X", 0.0, 2.0, 0.0)
+    skew_y = st.slider("Distorsi Y", 0.0, 2.0, 0.0)
     matriks_distorsi = np.array([[1, skew_x, 0],
-                                 [skew_y, 1, 0],
-                                 [0, 0, 1]])
-    tinggi_distorsi, lebar_distorsi = int(tinggi * 2), int(lebar * 2)
-    gambar_distorsi = np.zeros((tinggi_distorsi, lebar_distorsi, 3), dtype=gambar.dtype)
-    for y in range(tinggi):
-        for x in range(lebar):
-            koordinat_asli = np.array([x, y, 1])
-            koordinat_baru = matriks_distorsi @ koordinat_asli
-            x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
-            if 0 <= x_baru < lebar_distorsi and 0 <= y_baru < tinggi_distorsi:
-                gambar_distorsi[y_baru, x_baru] = gambar[y, x]
+                                  [skew_y, 1, 0],
+                                  [0, 0, 1]])
+
+    # Transformasi gambar
+    def transformasi_gambar(matriks, tinggi, lebar):
+        hasil = np.zeros_like(gambar)
+        for y in range(tinggi):
+            for x in range(lebar):
+                koordinat_asli = np.array([x, y, 1])
+                koordinat_baru = matriks @ koordinat_asli
+                x_baru, y_baru = int(koordinat_baru[0]), int(koordinat_baru[1])
+                if 0 <= x_baru < lebar and 0 <= y_baru < tinggi:
+                    hasil[y_baru, x_baru] = gambar[y, x]
+        return hasil
+
+    # Gambar setelah transformasi
+    gambar_translasi = transformasi_gambar(matriks_translasi, tinggi, lebar)
+    gambar_rotasi = transformasi_gambar(matriks_rotasi, tinggi, lebar)
+    gambar_skala = transformasi_gambar(matriks_skala, int(tinggi * scale), int(lebar * scale))
+    gambar_distorsi = transformasi_gambar(matriks_distorsi, tinggi, lebar)
+
+    # Menampilkan hasil transformasi
+    st.image(cv2.cvtColor(gambar_translasi, cv2.COLOR_BGR2RGB), caption="Gambar Translasi", use_container_width=True)
+    st.image(cv2.cvtColor(gambar_rotasi, cv2.COLOR_BGR2RGB), caption="Gambar Rotasi", use_container_width=True)
+    st.image(cv2.cvtColor(gambar_skala, cv2.COLOR_BGR2RGB), caption="Gambar Skala", use_container_width=True)
     st.image(cv2.cvtColor(gambar_distorsi, cv2.COLOR_BGR2RGB), caption="Gambar Distorsi", use_container_width=True)
