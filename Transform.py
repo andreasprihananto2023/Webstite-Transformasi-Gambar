@@ -13,6 +13,8 @@ if unggah_file is not None:
     file_bytes = np.asarray(bytearray(unggah_file.read()), dtype=np.uint8)
     gambar = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     tinggi, lebar = gambar.shape[:2]
+
+    # Menampilkan gambar asli
     st.image(cv2.cvtColor(gambar, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_container_width=True)
 
     # Slider untuk transformasi
