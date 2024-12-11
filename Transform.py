@@ -3,9 +3,9 @@ import cv2
 import numpy as np
 import math
 
-st.title("Aplikasi Transformasi Gambar Interaktif")
+st.title("Aplikasi Transformasi Gambar")
 
-# Unggah file gambar
+# Unggah file
 unggah_file = st.file_uploader("Unggah gambar dalam format JPEG atau PNG", type=["jpg", "jpeg", "png"])
 
 if unggah_file is not None:
@@ -13,33 +13,49 @@ if unggah_file is not None:
     file_bytes = np.asarray(bytearray(unggah_file.read()), dtype=np.uint8)
     gambar = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     tinggi, lebar = gambar.shape[:2]
-
-    # Menampilkan gambar asli
     st.image(cv2.cvtColor(gambar, cv2.COLOR_BGR2RGB), caption="Gambar Asli", use_container_width=True)
 
-    # Slider untuk transformasi
-    dx = st.slider("Translasi X (px)", -200, 200, 0)
-    dy = st.slider("Translasi Y (px)", -200, 200, 0)
-    sudut = st.slider("Sudut Rotasi (derajat)", -180, 180, 0)
-    scale = st.slider("Faktor Skala", 0.5, 2.0, 1.0)
-    skew_x = st.slider("Distorsi X", 0.0, 2.0, 0.0)
-    skew_y = st.slider("Distorsi Y", 0.0, 2.0, 0.0)
+    # 1. Translasi
+    st.subheader("Translasi")
+    dx = st.slider("Translasi Horizontal (dx)", -200, 200, 50)
+    dy = st.slider("Translasi Vertikal (dy)", -200, 200, 30)
 
-    # Menghitung matriks transformasi gabungan
-    angle_rad = math.radians(sudut)
-    matriks_translasi = np.array([[1, 0, dx],
-                                  [0, 1, dy]])
-    matriks_rotasi = cv2.getRotationMatrix2D((lebar / 2, tinggi / 2), sudut, scale)
-    matriks_skala = np.array([[scale, 0],
-                              [0, scale]])
-    matriks_distorsi = np.array([[1, skew_x],
-                                 [skew_y, 1]])
+    # Gunakan fungsi warpAffine untuk translasi
+    matriks_translasi = np.float32([[1, 0, dx], [0, 1, dy]])
+    gambar_translasi = cv2.warpAffine(gambar, matriks_translasi, (lebar, tinggi))
+    st.image(cv2.cvtColor(gambar_translasi, cv2.COLOR_BGR2RGB), caption="Gambar Translasi", use_container_width=True)
 
-    # Matriks gabungan
-    matriks_transformasi = matriks_translasi @ matriks_rotasi @ matriks_skala @ matriks_distorsi
+    # 2. Rotasi
+    st.subheader("Rotasi")
+    sudut = st.slider("Sudut Rotasi (derajat)", -180, 180, 45)
+    
+    # Gunakan getRotationMatrix2D untuk rotasi yang lebih presisi
+    tengah = (lebar // 2, tinggi // 2)
+    matriks_rotasi = cv2.getRotationMatrix2D(tengah, sudut, 1.0)
+    gambar_rotasi = cv2.warpAffine(gambar, matriks_rotasi, (lebar, tinggi))
+    st.image(cv2.cvtColor(gambar_rotasi, cv2.COLOR_BGR2RGB), caption="Gambar Rotasi", use_container_width=True)
 
-    # Transformasi gambar menggunakan cv2.warpAffine
-    gambar_akhir = cv2.warpAffine(gambar, matriks_transformasi[:2], (lebar, tinggi))
+    # 3. Skala
+    st.subheader("Skala")
+    skala_x = st.slider("Skala Horizontal", 0.5, 3.0, 1.5)
+    skala_y = st.slider("Skala Vertikal", 0.5, 3.0, 1.5)
 
-    # Menampilkan hasil transformasi
-    st.image(cv2.cvtColor(gambar_akhir, cv2.COLOR_BGR2RGB), caption="Hasil Transformasi", use_container_width=True)
+    # Gunakan resize untuk scaling dengan interpolasi
+    gambar_skala = cv2.resize(gambar, None, fx=skala_x, fy=skala_y, interpolation=cv2.INTER_LINEAR)
+    st.image(cv2.cvtColor(gambar_skala, cv2.COLOR_BGR2RGB), caption="Gambar Skala", use_container_width=True)
+
+    # 4. Distorsi (Skewing)
+    st.subheader("Distorsi")
+    skew_x = st.slider("Distorsi Horizontal", 0.0, 2.0, 1.5)
+    skew_y = st.slider("Distorsi Vertikal", 0.0, 2.0, 0.5)
+
+    # Gunakan perspectiveTransform untuk skewing
+    pts1 = np.float32([[0,0], [lebar-1,0], [0,tinggi-1], [lebar-1,tinggi-1]])
+    pts2 = np.float32([[0,0], 
+                       [lebar-1,0], 
+                       [skew_x*lebar,tinggi-1], 
+                       [(1+skew_y)*lebar-1,tinggi-1]])
+
+    matriks_distorsi = cv2.getPerspectiveTransform(pts1, pts2)
+    gambar_distorsi = cv2.warpPerspective(gambar, matriks_distorsi, (lebar, tinggi))
+    st.image(cv2.cvtColor(gambar_distorsi, cv2.COLOR_BGR2RGB), caption="Gambar Distorsi", use_container_width=True)
